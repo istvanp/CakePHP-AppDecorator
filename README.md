@@ -17,13 +17,12 @@ Makes your views more pretty by encouraging code-reuse and cleaner syntax.
 
 ### Schema
 The `user` table contains the following (we assume nothing else is defined):
-+-------+---------+
+
 | field | type    |
-+-------+---------+
+|-------|---------|
 | id    | INT     |
 | fname | VARCHAR |
 | lname | VARCHAR |
-+-------+---------+
 
 ### Controller
 ```php
