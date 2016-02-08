@@ -132,6 +132,7 @@ class AppModel extends Model {
 
         return $this->decorate($results);
     }
+}
 ```
 
 ### Usage
