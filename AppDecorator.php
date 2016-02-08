@@ -12,7 +12,6 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
     private $isCollection = false;
 
     private static $_HtmlHelper = null;
-    private static $_TimeHelper = null;
 
     public function __construct($_attributes = null, $modelName = null) {
         if ($modelName) {
@@ -169,11 +168,8 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
             if (is_null(self::$_HtmlHelper)) {
 
                 App::uses('HtmlHelper', 'View/Helper');
-                App::uses('AmHtmlHelper', 'View/Helper');
 
-                if (class_exists('AmHtmlHelper')) {
-                    self::$_HtmlHelper = new AmHtmlHelper(new View());
-                } else if (class_exists('HtmlHelper')) {
+                if (class_exists('HtmlHelper')) {
                     self::$_HtmlHelper = new HtmlHelper(new View());
                 }
             }
@@ -181,22 +177,7 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
             return self::$_HtmlHelper;
         }
 
-        if ($attribute == 'Time') {
-            if (is_null(self::$_TimeHelper)) {
-
-                include_once ASKMEN_ROOT . '/front/View/Helper/AmTimeHelper.php';
-
-                if (class_exists('AmTimeHelper')) {
-                    self::$_TimeHelper = new AmTimeHelper(new View());
-                }
-            }
-
-            return self::$_TimeHelper;
-        }
-
-        if (RUNTIME_ENV == 'dev') {
-            show_error("$attribute is not defined in {$this->getModelName()}", E_USER_NOTICE);
-        }
+        show_error("$attribute is not defined in {$this->getModelName()}", E_USER_NOTICE);
 
         return null;
     }
