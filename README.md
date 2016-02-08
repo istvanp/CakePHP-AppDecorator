@@ -1,9 +1,10 @@
 # CakePHP-AppDecorator
-A decorator for CakePHP 2.x and PHP 5.3+
+A decorator pattern implementation for CakePHP 2.x and PHP 5.3+.  
+Makes your views more pretty by encouraging code-reuse and cleaner syntax.
 
 ## Setup
-1. Copy AppDecorator.php to APP_DIR/Decorator/AppDecorator.php
-2. Modify bootstrap.php to include the following:
+1. Copy `AppDecorator.php` to `APP_DIR/Decorator/AppDecorator.php`
+2. Modify `bootstrap.php` to include the following:
   
   ```php
   App::build(array(
@@ -15,34 +16,14 @@ A decorator for CakePHP 2.x and PHP 5.3+
 ## Example Usage
 
 ### Schema
-The `user` table contains the following:
-
+The `user` table contains the following (we assume nothing else is defined):
++-------+---------+
 | field | type    |
-|-------|---------|
++-------+---------+
 | id    | INT     |
 | fname | VARCHAR |
 | lname | VARCHAR |
-
-
-### Decorator
-```php
-class UserDecorator extends AppDecorator {
-    function name() {
-        return $this->fname . " " . $this->lname;
-    }
-    
-    /**
-     * For illustration purposes $this->fname (and $this->lname, similarly)
-     * does the following internally... You don't need to define any of the
-     * attributes that are available from the passed data array that you
-     * instantiate the decorator with.
-     */
-    function fname() {
-        return $this->attributes['fname'];
-    }
-}
-
-```
++-------+---------+
 
 ### Controller
 ```php
@@ -62,7 +43,27 @@ $this->set('user', $user);
 <div>Full name: <?= $user->name ?></div>
 ```
 
-## Optional: integrate with the find() method
+### Decorator
+```php
+class UserDecorator extends AppDecorator {
+    function name() {
+        return $this->fname . " " . $this->lname;
+    }
+    
+    /**
+     * For illustration purposes $this->fname (and $this->lname, similarly) does
+     * the following internally... You don't need to define getters for any the
+     * attributes that are available from the passed data array that you
+     * instantiate the decorator with.
+     *
+     * function fname() {
+     *     return $this->attributes['fname'];
+     * }
+     */
+}
+```
+
+## Integrate with the `Model::find()` method (Optional)
 
 ### Setup
 Add the following to your AppModel:
