@@ -139,6 +139,7 @@ By default, the decorator will serialize all available attributes (note that met
 ### Serializing methods or attributes selectively
 
 - Set the `$serializableAttributes` property in the decorator to act as the default when serializing:
+
   ```php
   class UserDecorator extends AppDecorator {
       public $serializableAttributes = array('id', 'name');
@@ -169,8 +170,8 @@ If your model contains any binds (hasOne, HABTM, hasMany), they can be docorated
 
 **This section is a stub.**
 
-## Integrate with the `Model::find()` method (optional)
-Instead of having to require the use of a decorator and instantiating it, you can do so automatically if when doing a `find()`.
+## Returning a decorator instead of an array on Model::find()
+Instead of having to require the use of a decorator and instantiating it, you can do so automatically when doing a `find()`.
 
 ### Setup
 Add the following to your `APP_DIR/Model/AppModel.php` file:
