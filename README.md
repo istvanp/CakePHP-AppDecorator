@@ -8,15 +8,32 @@ Makes your views more pretty by encouraging code-reuse and cleaner syntax.
   
   ```php
   App::build(array(
-      'Decorator' => array('/app/Decorator/')
+      'Decorator' => array(DS . APP_DIR . DS . 'Decorator' . DS)
   ), App::REGISTER);
   ```
   This will add the search path for Cake when you need to instantiate a decorator.
   
-## Example Usage
+3. Optionally, but highly recommended, auto-load the `AppDecorator` in `bootstrap.php` so that you don't need to require before the class definition of each decorator:
+  ```
+  App::uses('AppDecorator', 'Decorator');
+  ```
+
+`JsonSerializable` is a PHP 5.4 feature that allows us to _automatically_ let PHP know about how we wish to marshal our data into JSON. As such, in PHP 5.3, you will need to call `jsonSerialize()` yourself so that it returns a generic array instead of an object.
+
+### PHP 5.4+
+Modify the class declaration of `AppDecorator` to the following:
+```php
+<?php 
+class AppDecorator implements IteratorAggregate, ArrayAccess, Countable, JsonSerializable {
+# ...
+```
+### PHP 5.3
+Leave the AppDecorator as is, but in every controller where you must return JSON, make sure to call `jsonSerialize()`. See below for an example.
+  
+## Basic Usage
 
 ### Schema
-For all the following example we assume that the `user` table contains only the following structure:
+For all the following example we assume that the `users` table contains only the following structure:
 
 | field | type    |
 |-------|---------|
@@ -26,28 +43,78 @@ For all the following example we assume that the `user` table contains only the 
 
 ### Controller
 ```php
-$this->loadModel('User');
-$data = $this->User->findById(1);
+<?php
+class UsersController extends AppController {
+	public $components = array('RequestHandler');
+	
+	# Note: Make sure you have this to your routes.php for these examples to work:
+	# Router::mapResources('users');
+    # Router::parseExtensions();
+    
+	function index() {
+		App::uses('UserDecorator', 'Decorator');
+		$users = $this->User->find('all');
+		$this->set('users', new UserDecorator($users));
+	}
 
-App::uses('UserDecorator', 'Decorator');
-$user = new UserDecorator($data);
+	function view($id) {
+		$data = $this->User->findById($id);
 
-$this->set('user', $user);
+		App::uses('UserDecorator', 'Decorator');
+		$user = new UserDecorator($data);
+
+		$this->set('user', $user->jsonSerialize()); # With PHP 5.4+ you don't need to call
+													# the jsonSerialize() method as long
+                                                	# as you modified AppDecorator as
+													# indicated in the Setup step
+		$this->set('_serialize', array('user'));
+	}
+}
 ```
 
-### View
+### Example JSON response
+`GET /users/1.json`
+```JSON
+{
+    "user": {
+        "id": "1",
+        "name": "Han Solo"
+    }
+}
+```
+
+### View (index.ctp)
+
 ```html+php
-<div>First name: <?= $user->fname ?></div>
-<div>Last name: <?= $user->lname ?></div>
-<div>Full name: <?= $user->name ?></div>
+<table>
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>First</th>
+			<th>Last</th>
+			<th>Full</th>
+		</tr>
+	</thead>
+	<tbody>
+	<? foreach($users as $user): ?>
+		<tr>
+			<td><?= $user->fname ?></td>
+			<td><?= $user->lname ?></td>
+			<td><?= $user->name ?></td>
+		</tr>
+	<? endforeach ?>
+	</tbody>
+</table>
 ```
 
 ### Decorator
 ```php
 class UserDecorator extends AppDecorator {
-    function name() {
-        return $this->fname . " " . $this->lname;
-    }
+	public $serializableAttributes = array('id', 'name');
+
+	function name() {
+		return $this->fname . " " . $this->lname;
+	}
     
     /**
      * For illustration purposes $this->fname (and $this->lname, similarly) does
@@ -67,46 +134,43 @@ class UserDecorator extends AppDecorator {
 ## JSON Serializer
 Using the decorator object is very useful if you are working with AJAX or API responses as it allows you to be selective about which attributes (or methods) you wish to expose.
 
-### Simple serializer example
-By default, the decorator will serialize all available attributes (note that methods are not automatically added).
-
-```php
-# in a action function in UserController.php
-$user = $this->User->findById($id);
-$user = new UserDecorator($user);
-
-$this->set('user', $user->jsonSerialize());
-$this->set('_serialize', array('user'));
-```
+By default, the decorator will serialize all available attributes (note that methods are not automatically added). An example is already provided above in the context of returning a JSON API response.
 
 ### Serializing methods or attributes selectively
 
-1. Pass an array of attributes or methods to serialize as the first argument to `jsonSerialize()`:
+- Set the `$serializableAttributes` property in the decorator to act as the default when serializing:
+  ```php
+  class UserDecorator extends AppDecorator {
+      public $serializableAttributes = array('id', 'name');
+  # ...
+  }
+  ```
+- Pass an array of attributes or methods to serialize as the first argument to `jsonSerialize()` (this overrides the class-defined default above):
 
   ```php
   $user = new UserDecorator($user);
   $this->set('user', $user->jsonSerialize(array('name')));
   $this->set('_serialize', array('user'));
   ```
+  
+- Disable serializing altogether (useful for associatied data):
 
-2. Set the `$serializableAttributes` property in the decorator:
-  ```php
-  class UserDecorator extends AppDecorator {
-      protected $serializableAttributes = array('name');
-  # ...
-  ```
-
-3. Disable serializing altogether:
-
-  Set the `$serializableAttributes` to `false`. (Note: an empty array or `null` will serialize all attributes instead.)
+  Set the `$serializableAttributes` to `false` or `array()`:
 
   ```php
   class UserDecorator extends AppDecorator {
-      protected $serializableAttributes = false;
+      public $serializableAttributes = false;
   # ...
+  }
   ```
+  
+## Associations
+If your model contains any binds (hasOne, HABTM, hasMany), they can be docorated if they are nested into a parent record.
+
+**This section is a stub.**
 
 ## Integrate with the `Model::find()` method (optional)
+Instead of having to require the use of a decorator and instantiating it, you can do so automatically if when doing a `find()`.
 
 ### Setup
 Add the following to your `APP_DIR/Model/AppModel.php` file:
@@ -182,7 +246,6 @@ class AppModel extends Model {
 ### Usage
 
 ```php
-$this->loadModel('User');
 $user = $this->User->find('decorateFirst', array('conditions' => array('id' => 1)));
 #=> Will return a single decorated user who has an id = 1
 
