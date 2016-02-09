@@ -246,13 +246,58 @@ class AppModel extends Model {
 
 ### Usage
 
-```php
-$user = $this->User->find('decorateFirst', array('conditions' => array('id' => 1)));
-#=> Will return a single decorated user who has an id = 1
+#### `decorateFirst`
+Decorate the first result like `Model::find('first')`:
 
-$users = $this->User->find('decorate', array('conditions' => array('id <=' => 10)));
-#=> Will return an array of decorated users who have an id <= 10
+```php
+$user = $this->User->find('decorateFirst', array(
+    'conditions' => array(
+        'id' => 1
+    )
+));
+```
+
+```JSON
+{
+    "user": {
+        "id": "1",
+        "name": "Han Solo"
+    }
+}
+```
+
+#### `decorate`
+Decorate all like `Model::find('all')`:
+
+```php
+$users = $this->User->find('decorate', array(
+	'conditions' => array(
+		'id <=' => 3
+	)
+));
+```
+
+```JSON
+{
+    "users": [
+        {
+            "id": "1",
+            "fname": "Han",
+            "lname": "Solo"
+        },
+        {
+            "id": "2",
+            "fname": "Luke",
+            "lname": "Skywalker"
+        },
+        {
+            "id": "3",
+            "fname": "Princess",
+            "lname": "Leia"
+        }
+    ]
+}
 ```
 
 Note that you can use `decorateFirst` even when your query has the possibility to return multiple rows.
-`decorateFirst` actually adds a `LIMIT 1` to your query.
+`decorateFirst` actually adds a `LIMIT 1` to your query similar to the `first` find method.
