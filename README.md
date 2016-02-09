@@ -164,11 +164,6 @@ By default, the decorator will serialize all available attributes (note that met
   # ...
   }
   ```
-  
-## Associations
-If your model contains any binds (hasOne, HABTM, hasMany), they can be docorated if they are nested into a parent record.
-
-**This section is a stub.**
 
 ## Returning a decorator instead of an array on Model::find()
 Instead of having to require the use of a decorator and instantiating it, you can do so automatically when doing a `find()`.
@@ -301,3 +296,9 @@ $users = $this->User->find('decorate', array(
 
 Note that you can use `decorateFirst` even when your query has the possibility to return multiple rows.
 `decorateFirst` actually adds a `LIMIT 1` to your query similar to the `first` find method.
+
+  
+## Associations
+If your model contains any binds (hasOne, HABTM, hasMany), they can be decorated if they are nested into a parent record.
+
+**This section is a work in progress.**
