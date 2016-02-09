@@ -206,10 +206,10 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
             # passed attribute takes precedence over the class property
             $keys = func_num_args() > 0 ? $attributes : $this->serializableAttributes;
 
-            # array() and null will return all attributes
-            if (empty($keys)) {
+            # null or true will return all attributes
+            if ($keys === true || $keys === null) {
                 $return = $this->attributes;
-            } else {
+            } else if (is_array($keys)) {
                 # only return the requested methods and attributes
                 foreach ($keys as $key) {
                     if (method_exists($this, $key)) {
