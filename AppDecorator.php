@@ -77,7 +77,7 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
     public function offsetGet($offset) {
         return isset($this->attributes[$offset]) ? $this->attributes[$offset] : null;
     }
-    
+
     public function set($_attributes) {
         if (is_array($_attributes)) {
             if (array_key_exists($this->getModelName(), $_attributes)) {
@@ -201,15 +201,22 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
         }
 
         if ($attributes === false || $this->serializableAttributes === false) {
-            // do nothing, we are not returning any attributes
-        } else if ( ! empty($attributes) ||  ! empty($this->serializableAttributes)) {
-            $keys = empty($attributes) ? $this->serializableAttributes : $attributes;
+            // do nothing, we are not returning any attributes or methods
+        } else if (func_num_args() > 0 || $this->serializableAttributes !== null) {
+            # passed attribute takes precedence over the class property
+            $keys = func_num_args() > 0 ? $attributes : $this->serializableAttributes;
 
-            foreach ($keys as $key) {
-                if (method_exists($this, $key)) {
-                    $return[$key] = $this->$key;
-                } else if (isset($this->attributes[$key])) {
-                    $return[$key] = $this->attributes[$key];
+            # array() and null will return all attributes
+            if (empty($keys)) {
+                $return = $this->attributes;
+            } else {
+                # only return the requested methods and attributes
+                foreach ($keys as $key) {
+                    if (method_exists($this, $key)) {
+                        $return[$key] = $this->$key;
+                    } else if (isset($this->attributes[$key])) {
+                        $return[$key] = $this->attributes[$key];
+                    }
                 }
             }
 
