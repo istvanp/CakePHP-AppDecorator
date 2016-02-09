@@ -1,6 +1,6 @@
 # CakePHP-AppDecorator
 A decorator pattern implementation for CakePHP 2.x and PHP 5.3+.  
-Makes your views more pretty by encouraging code-reuse and cleaner syntax.
+Makes your controllers and views more pretty by encouraging code-reuse and cleaner syntax by dealing with objects instead of arrays.
 
 ## Setup
 1. Copy `AppDecorator.php` to `APP_DIR/Decorator/AppDecorator.php`
