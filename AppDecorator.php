@@ -4,9 +4,9 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
     public $children = array(); // Child nodes from threaded find results
 
     protected $attributes = array();
-    protected $serializableAttributes = null;
     protected $associations = array();
-    protected $serializableAssociations = null;
+    public $serializableAttributes = null;
+    public $serializableAssociations = null;
 
     private $modelName = null;
     private $isCollection = false;
