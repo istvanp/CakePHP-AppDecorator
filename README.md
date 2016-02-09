@@ -16,7 +16,7 @@ Makes your views more pretty by encouraging code-reuse and cleaner syntax.
 ## Example Usage
 
 ### Schema
-The `user` table contains the following (we assume nothing else is defined):
+For all the following example we assume that the `user` table contains only the following structure:
 
 | field | type    |
 |-------|---------|
@@ -36,7 +36,7 @@ $this->set('user', $user);
 ```
 
 ### View
-```html
+```html+php
 <div>First name: <?= $user->fname ?></div>
 <div>Last name: <?= $user->lname ?></div>
 <div>Full name: <?= $user->name ?></div>
@@ -51,21 +51,65 @@ class UserDecorator extends AppDecorator {
     
     /**
      * For illustration purposes $this->fname (and $this->lname, similarly) does
-     * the following internally... You don't need to define getters for any the
-     * attributes that are available from the passed data array that you
-     * instantiate the decorator with.
+     * the following internally:
      *
      * function fname() {
      *     return $this->attributes['fname'];
      * }
+     *
+     * You do not need to define getters for any of the attributes that are
+     * available from the passed data array that you instantiate the decorator
+     * with.
      */
 }
 ```
 
-## Integrate with the `Model::find()` method (Optional)
+## JSON Serializer
+Using the decorator object is very useful if you are working with AJAX or API responses as it allows you to be selective about which attributes (or methods) you wish to expose.
+
+### Simple serializer example
+By default, the decorator will serialize all available attributes (note that methods are not automatically added).
+
+```php
+# in a action function in UserController.php
+$user = $this->User->findById($id);
+$user = new UserDecorator($user);
+
+$this->set('user', $user->jsonSerialize());
+$this->set('_serialize', array('user'));
+```
+
+### Serializing methods or attributes selectively
+
+1. Pass an array of attributes or methods to serialize as the first argument to `jsonSerialize()`:
+
+  ```php
+  $user = new UserDecorator($user);
+  $this->set('user', $user->jsonSerialize(array('name')));
+  $this->set('_serialize', array('user'));
+  ```
+
+2. Set the `$serializableAttributes` property in the decorator:
+  ```php
+  class UserDecorator extends AppDecorator {
+      protected $serializableAttributes = array('name');
+  # ...
+  ```
+
+3. Disable serializing altogether:
+
+  Set the `$serializableAttributes` to `false`. (Note: an empty array or `null` will serialize all attributes instead.)
+
+  ```php
+  class UserDecorator extends AppDecorator {
+      protected $serializableAttributes = false;
+  # ...
+  ```
+
+## Integrate with the `Model::find()` method (optional)
 
 ### Setup
-Add the following to your AppModel:
+Add the following to your `APP_DIR/Model/AppModel.php` file:
 
 ```php
 <?php
@@ -140,6 +184,11 @@ class AppModel extends Model {
 ```php
 $this->loadModel('User');
 $user = $this->User->find('decorateFirst', array('conditions' => array('id' => 1)));
-#=> Returns a single decorated user who has ID = 1
+#=> Will return a single decorated user who has an id = 1
+
 $users = $this->User->find('decorate', array('conditions' => array('id <=' => 10)));
-#=> Returns an array of decorated users who have ID <= 10
+#=> Will return an array of decorated users who have an id <= 10
+```
+
+Note that you can use `decorateFirst` even when your query has the possibility to return multiple rows.
+`decorateFirst` actually adds a `LIMIT 1` to your query.
