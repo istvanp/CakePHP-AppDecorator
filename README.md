@@ -1,6 +1,6 @@
 # CakePHP-AppDecorator
 A decorator pattern implementation for CakePHP 2.x and PHP 5.3+.  
-Makes your controllers and views more pretty by encouraging code-reuse and cleaner syntax by dealing with objects instead of arrays.
+Makes your controllers and views more pretty by encouraging code-reuse and cleaner syntax by dealing with objects instead of arrays for your models.
 
 ## Setup
 1. Copy `AppDecorator.php` to `APP_DIR/Decorator/AppDecorator.php`
@@ -13,12 +13,13 @@ Makes your controllers and views more pretty by encouraging code-reuse and clean
   ```
   This will add the search path for Cake when you need to instantiate a decorator.
   
-3. Optionally, but highly recommended, auto-load the `AppDecorator` in `bootstrap.php` so that you don't need to require before the class definition of each decorator:
+3. Optionally, but highly recommended, auto-load the `AppDecorator` in `bootstrap.php` so that you don't need to require it before the class definition of each decorator:
   ```
+  # Somewhere in bootstrap.php
   App::uses('AppDecorator', 'Decorator');
   ```
 
-`JsonSerializable` is a PHP 5.4 feature that allows us to _automatically_ let PHP know about how we wish to marshal our data into JSON. As such, in PHP 5.3, you will need to call `jsonSerialize()` yourself so that it returns a generic array instead of an object.
+`JsonSerializable` is a PHP 5.4 feature that allows us to automatically let PHP know about how we wish to marshal our data into JSON. As such, for PHP 5.3 and older, you will need to call `jsonSerialize()` yourself so that it returns a generic array instead of an object.
 
 ### PHP 5.4+
 Modify the class declaration of `AppDecorator` to the following:
@@ -33,7 +34,7 @@ Leave the AppDecorator as is, but in every controller where you must return JSON
 ## Basic Usage
 
 ### Schema
-For all the following example we assume that the `users` table contains only the following structure:
+For all the examples below we assume that the `users` table contains only the following structure:
 
 | field | type    |
 |-------|---------|
