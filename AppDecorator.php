@@ -99,6 +99,8 @@ class AppDecorator implements IteratorAggregate, ArrayAccess, Countable /*, Json
 
                         if (class_exists($decoratorClass)) {
                             $_attributes[$key] = new $decoratorClass($data);
+                        } else {
+                            $_attributes[$key] = new AppDecorator($data, $this->getModelName());
                         }
                     }
                 }
